@@ -1,6 +1,7 @@
 import dot_env as dot
 import dot_env/env
 import gleam/erlang/process
+import handlers/auth_with_password
 import handlers/health_check
 import mist
 import wisp
@@ -11,6 +12,7 @@ pub fn router(req: wisp.Request) -> wisp.Response {
 
   case wisp.path_segments(req) {
     ["api", "health"] -> health_check.handler(req)
+    ["api", "auth-with-password"] -> auth_with_password.handler(req)
     _ -> wisp.not_found()
   }
 }
