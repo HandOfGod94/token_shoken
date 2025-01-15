@@ -1,5 +1,7 @@
 # token_shoken
 
+Gleam app to manage auth tokens and managing users
+
 > NOTE: This is a learning app. Not to be used in production
 
 [![Package Version](https://img.shields.io/hexpm/v/token_shoken)](https://hex.pm/packages/token_shoken)
