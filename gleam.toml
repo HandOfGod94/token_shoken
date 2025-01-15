@@ -20,6 +20,7 @@ mist = "~> 4.0"
 gjwt = "~> 1.0"
 gleam_json = "~> 2.3"
 gleam_erlang = "~> 0.33"
+dot_env = "~> 1.2"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
