@@ -1,5 +1,7 @@
 # token_shoken
 
+> NOTE: This is a learning app. Not to be used in production
+
 [![Package Version](https://img.shields.io/hexpm/v/token_shoken)](https://hex.pm/packages/token_shoken)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/token_shoken/)
 
