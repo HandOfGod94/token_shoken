@@ -69,11 +69,15 @@ pub fn login(
       let res =
         case db_res {
           Ok(val) -> {
-            list.map(val, fn(x) {
-              user(x) |> result.map_error(fn(_) { AuthError("failed") })
-            })
-            |> list.first
-            |> result.map_error(fn(_) { AuthError("failed") })
+            let user_list = {
+              use raw <- list.map(val)
+              let usr = user(raw)
+
+              use _e <- result.map_error(usr)
+              AuthError("failed")
+            }
+            use e <- result.map_error(list.first(user_list))
+            AuthError("failed")
           }
           Error(_) -> Error(AuthError("failed"))
         }
