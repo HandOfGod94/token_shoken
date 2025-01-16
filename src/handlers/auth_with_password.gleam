@@ -11,33 +11,39 @@ type AuthWithPassword {
   // TODO: make username vs email distinction
 }
 
+type HandlerError {
+  BadRequestError(message: String)
+  InvalidCredentialError(message: String)
+}
+
 fn decode_request(
   json: dynamic.Dynamic,
-  next: fn(Result(AuthWithPassword, List(decode.DecodeError))) -> wisp.Response,
-) -> wisp.Response {
+) -> Result(AuthWithPassword, HandlerError) {
   let decoder = {
     use username <- decode.field("username", decode.string)
     use password <- decode.field("password", decode.string)
     decode.success(AuthWithPassword(username:, password:))
   }
 
-  next(decode.run(json, decoder))
+  json
+  |> decode.run(decoder)
+  |> result.map_error(fn(_) { BadRequestError(message: "Invalid request") })
 }
 
 pub fn handler(req: wisp.Request) -> wisp.Response {
   use <- wisp.require_method(req, http.Post)
   use json <- wisp.require_json(req)
-  use body <- decode_request(json)
 
   let login_result =
-    body
+    json
+    |> decode_request()
     |> result.map(fn(x) {
       authenticator.login(authenticator.UsernamePasswordAuthenticator(
         username: x.username,
         password: x.password,
       ))
+      |> result.map_error(fn(x) { InvalidCredentialError(x.message) })
     })
-    |> result.map_error(fn(_) { authenticator.AuthError("Invalid credentials") })
     |> result.flatten()
 
   case login_result {
