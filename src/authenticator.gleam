@@ -65,23 +65,14 @@ pub fn login(
         username
         |> fetch_user_by_username()
         |> sqlite.run_read_query(decode.dynamic, db)
-
-      let res =
-        case db_res {
-          Ok(val) -> {
-            let user_list = {
-              use raw <- list.map(val)
-              let usr = user(raw)
-
-              use _e <- result.map_error(usr)
-              AuthError("failed")
-            }
-            use e <- result.map_error(list.first(user_list))
-            AuthError("failed")
-          }
-          Error(_) -> Error(AuthError("failed"))
+      let res = case db_res {
+        Ok(val) -> {
+          val
+          |> list.find_map(user)
+          |> result.map_error(fn(_) { AuthError("failed") })
         }
-        |> result.flatten
+        Error(_) -> Error(AuthError("failed"))
+      }
 
       case res {
         Ok(val) -> Ok(Tokens("access_token", "refresh_token"))
