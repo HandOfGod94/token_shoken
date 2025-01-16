@@ -21,6 +21,8 @@ gjwt = "~> 1.0"
 gleam_json = "~> 2.3"
 gleam_erlang = "~> 0.33"
 dot_env = "~> 1.2"
+cake = ">= 2.1.0 and < 3.0.0"
+cake_sqlight = ">= 1.1.1 and < 2.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
