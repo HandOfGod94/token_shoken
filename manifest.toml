@@ -48,4 +48,5 @@ gleam_json = { version = "~> 2.3" }
 gleam_stdlib = { version = "~> 0.52" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 mist = { version = "~> 4.0" }
+sqlight = { version = ">= 1.0.0 and < 2.0.0" }
 wisp = { version = "~> 1.5" }

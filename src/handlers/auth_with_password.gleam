@@ -1,3 +1,4 @@
+import app
 import authenticator
 import gleam/dynamic
 import gleam/dynamic/decode
@@ -30,7 +31,7 @@ fn decode_request(
   |> result.map_error(fn(_) { BadRequestError(message: "Invalid request") })
 }
 
-pub fn handler(req: wisp.Request) -> wisp.Response {
+pub fn handler(req: wisp.Request, ctx: app.Context) -> wisp.Response {
   use <- wisp.require_method(req, http.Post)
   use json <- wisp.require_json(req)
 
@@ -38,10 +39,13 @@ pub fn handler(req: wisp.Request) -> wisp.Response {
     json
     |> decode_request()
     |> result.map(fn(x) {
-      authenticator.login(authenticator.UsernamePasswordAuthenticator(
-        username: x.username,
-        password: x.password,
-      ))
+      authenticator.login(
+        ctx.conn,
+        authenticator.UsernamePasswordAuthenticator(
+          username: x.username,
+          password: x.password,
+        ),
+      )
       |> result.map_error(fn(x) { InvalidCredentialError(x.message) })
     })
     |> result.flatten()
