@@ -3,6 +3,7 @@ import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/http
 import gleam/json
+import gleam/result
 import wisp
 
 type AuthWithPassword {
@@ -28,14 +29,16 @@ pub fn handler(req: wisp.Request) -> wisp.Response {
   use json <- wisp.require_json(req)
   use body <- decode_request(json)
 
-  let login_result = case body {
-    Ok(val) ->
+  let login_result =
+    body
+    |> result.map(fn(x) {
       authenticator.login(authenticator.UsernamePasswordAuthenticator(
-        val.username,
-        val.password,
+        username: x.username,
+        password: x.password,
       ))
-    Error(_) -> Error(authenticator.AuthError("Invalid credentials"))
-  }
+    })
+    |> result.map_error(fn(_) { authenticator.AuthError("Invalid credentials") })
+    |> result.flatten()
 
   case login_result {
     Ok(tokens) ->
@@ -43,6 +46,10 @@ pub fn handler(req: wisp.Request) -> wisp.Response {
       |> authenticator.to_json
       |> json.to_string_tree
       |> wisp.json_response(200)
-    Error(_) -> wisp.bad_request()
+    Error(err) ->
+      [#("message", json.string(err.message))]
+      |> json.object
+      |> json.to_string_tree
+      |> wisp.json_response(401)
   }
 }
