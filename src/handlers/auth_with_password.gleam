@@ -32,17 +32,17 @@ fn decode_request(
   |> result.map_error(fn(_) { BadRequestError(message: "Invalid request") })
 }
 
-pub fn handler(req: wisp.Request, ctx: app.Context) -> wisp.Response {
+pub fn handler(req: wisp.Request, _ctx: app.Context) -> wisp.Response {
   use <- wisp.require_method(req, http.Post)
   use json <- wisp.require_json(req)
 
   let login_result = {
     use body <- result.try(decode_request(json))
 
-    authenticator.login(
-      ctx.conn,
-      authenticator.UsernamePasswordAuthenticator(body.username, body.password),
-    )
+    authenticator.login(authenticator.UsernamePasswordAuthenticator(
+      body.username,
+      body.password,
+    ))
     |> result.map_error(AuthError)
   }
 

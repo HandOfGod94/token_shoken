@@ -1,3 +1,4 @@
+import app
 import cake/adapter/sqlite
 import cake/select as s
 import cake/where as w
@@ -54,30 +55,32 @@ fn user(row) {
   )
 }
 
-pub fn login(
-  db: sqlight.Connection,
-  authenticator: Authenticator,
-) -> Result(Tokens, AuthError) {
+pub fn login(authenticator: Authenticator) -> Result(Tokens, AuthError) {
   case authenticator {
     UsernamePasswordAuthenticator(username: username, password: password) -> {
-      let db_res =
-        username
-        |> fetch_user_by_username()
-        |> sqlite.run_read_query(decode.dynamic, db)
-
-      use rows <- result.try(db_res |> result.map_error(DBError))
-      use user <- result.try(
-        rows
-        |> list.find_map(user)
-        |> result.map_error(UserNotPresentError),
-      )
-
-      use <- bool.guard(
-        user.password == password,
-        Error(InvalidCredentialsError),
-      )
-
-      Ok(Tokens("access_token", "refresh_token"))
+      login_with_password(username, password)
     }
   }
+}
+
+fn login_with_password(
+  username: String,
+  password: String,
+) -> Result(Tokens, AuthError) {
+  use db <- app.with_db_conn
+  let db_res =
+    username
+    |> fetch_user_by_username()
+    |> sqlite.run_read_query(decode.dynamic, db)
+
+  use rows <- result.try(db_res |> result.map_error(DBError))
+  use user <- result.try(
+    rows
+    |> list.find_map(user)
+    |> result.map_error(UserNotPresentError),
+  )
+
+  use <- bool.guard(user.password != password, Error(InvalidCredentialsError))
+
+  Ok(Tokens("access_token", "refresh_token"))
 }

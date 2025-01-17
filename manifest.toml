@@ -2,11 +2,15 @@
 # You typically do not need to edit this file
 
 packages = [
+  { name = "antigone", version = "1.1.0", build_tools = ["gleam"], requirements = ["argon2_elixir"], otp_app = "antigone", source = "hex", outer_checksum = "2AF72F94924FD2C1C732DF714F756BAB1B04E7128569F5E2785179A17691FC0D" },
+  { name = "argon2_elixir", version = "4.1.0", build_tools = ["mix", "make"], requirements = ["comeonin", "elixir_make"], otp_app = "argon2_elixir", source = "hex", outer_checksum = "2ECB6F2CA2CCA34B28E546224661BF2A85714516D2713C7313C5FFE8BDADE7CF" },
   { name = "birl", version = "1.8.0", build_tools = ["gleam"], requirements = ["gleam_regexp", "gleam_stdlib", "ranger"], otp_app = "birl", source = "hex", outer_checksum = "2AC7BA26F998E3DFADDB657148BD5DDFE966958AD4D6D6957DD0D22E5B56C400" },
   { name = "cake", version = "2.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "cake", source = "hex", outer_checksum = "141FEBE63A3BBD2872232BBB61B83E75F9367A4C07DD825286D58AF8D86D7702" },
   { name = "cake_sqlight", version = "1.1.1", build_tools = ["gleam"], requirements = ["cake", "gleam_stdlib", "sqlight"], otp_app = "cake_sqlight", source = "hex", outer_checksum = "AF08909B94A755DFBB47BD92454C1A3FAA87611C2536B70F8274D70BFC87A0EC" },
+  { name = "comeonin", version = "5.5.0", build_tools = ["mix"], requirements = [], otp_app = "comeonin", source = "hex", outer_checksum = "6287FC3BA0AAD34883CBE3F7949FC1D1E738E5CCDCE77165BC99490AA69F47FB" },
   { name = "directories", version = "1.1.0", build_tools = ["gleam"], requirements = ["envoy", "gleam_stdlib", "platform", "simplifile"], otp_app = "directories", source = "hex", outer_checksum = "BDA521A4EB9EE3A7894F0DC863797878E91FF5C7826F7084B2E731E208BDB076" },
   { name = "dot_env", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "simplifile"], otp_app = "dot_env", source = "hex", outer_checksum = "F2B4815F1B5AF8F20A6EADBB393E715C4C35203EBD5BE8200F766EA83A0B18DE" },
+  { name = "elixir_make", version = "0.9.0", build_tools = ["mix"], requirements = [], otp_app = "elixir_make", source = "hex", outer_checksum = "DB23D4FD8B757462AD02F8AA73431A426FE6671C80B200D9710CAF3D1DD0FFDB" },
   { name = "envoy", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "95FD059345AA982E89A0B6E2A3BF1CF43E17A7048DCD85B5B65D3B9E4E39D359" },
   { name = "esqlite", version = "0.8.9", build_tools = ["rebar3"], requirements = [], otp_app = "esqlite", source = "hex", outer_checksum = "465AE9AE28AE4192EA54C829FDC90C320447D439A9B2E10946621672FC6A6F8C" },
   { name = "exception", version = "2.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "exception", source = "hex", outer_checksum = "F5580D584F16A20B7FCDCABF9E9BE9A2C1F6AC4F9176FA6DD0B63E3B20D450AA" },
@@ -38,6 +42,7 @@ packages = [
 ]
 
 [requirements]
+antigone = { version = ">= 1.1.0 and < 2.0.0" }
 cake = { version = ">= 2.1.0 and < 3.0.0" }
 cake_sqlight = { version = ">= 1.1.1 and < 2.0.0" }
 dot_env = { version = "~> 1.2" }

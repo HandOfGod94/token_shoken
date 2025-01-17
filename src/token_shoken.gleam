@@ -1,5 +1,4 @@
 import app
-import cake/adapter/sqlite
 import dot_env as dot
 import dot_env/env
 import gleam/erlang/process
@@ -29,13 +28,9 @@ pub fn main() {
 
   wisp.configure_logger()
 
-  let filename = "./db/data.db"
-
-  use conn <- sqlite.with_connection(filename)
-
   let assert Ok(_) =
     wisp_mist.handler(
-      router(app.Context(conn)),
+      router(app.Context),
       env.get_string_or("SECRET_KEY", "someappsecret"),
     )
     |> mist.new
