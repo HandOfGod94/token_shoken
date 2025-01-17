@@ -1,6 +1,7 @@
 import cake/adapter/sqlite
 import cake/select as s
 import cake/where as w
+import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/json
@@ -17,11 +18,9 @@ pub type Tokens {
 }
 
 pub type AuthError {
-  AuthError(message: String)
-}
-
-pub type AuthSuccessResponse {
-  AuthSuccessResponse(access_token: String, refresh_token: String)
+  DBError(sqlight.Error)
+  UserNotPresentError(Nil)
+  InvalidCredentialsError
 }
 
 pub fn to_json(resp: Tokens) -> json.Json {
@@ -65,19 +64,20 @@ pub fn login(
         username
         |> fetch_user_by_username()
         |> sqlite.run_read_query(decode.dynamic, db)
-      let res = case db_res {
-        Ok(val) -> {
-          val
-          |> list.find_map(user)
-          |> result.map_error(fn(_) { AuthError("failed") })
-        }
-        Error(_) -> Error(AuthError("failed"))
-      }
 
-      case res {
-        Ok(val) -> Ok(Tokens("access_token", "refresh_token"))
-        Error(err) -> Error(AuthError("Invalid creds"))
-      }
+      use rows <- result.try(db_res |> result.map_error(DBError))
+      use user <- result.try(
+        rows
+        |> list.find_map(user)
+        |> result.map_error(UserNotPresentError),
+      )
+
+      use <- bool.guard(
+        user.password == password,
+        Error(InvalidCredentialsError),
+      )
+
+      Ok(Tokens("access_token", "refresh_token"))
     }
   }
 }

@@ -3,6 +3,7 @@ import authenticator
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/http
+import gleam/io
 import gleam/json
 import gleam/result
 import wisp
@@ -14,7 +15,7 @@ type AuthWithPassword {
 
 type HandlerError {
   BadRequestError(message: String)
-  InvalidCredentialError(message: String)
+  AuthError(authenticator.AuthError)
 }
 
 fn decode_request(
@@ -35,20 +36,15 @@ pub fn handler(req: wisp.Request, ctx: app.Context) -> wisp.Response {
   use <- wisp.require_method(req, http.Post)
   use json <- wisp.require_json(req)
 
-  let login_result =
-    json
-    |> decode_request()
-    |> result.map(fn(x) {
-      authenticator.login(
-        ctx.conn,
-        authenticator.UsernamePasswordAuthenticator(
-          username: x.username,
-          password: x.password,
-        ),
-      )
-      |> result.map_error(fn(x) { InvalidCredentialError(x.message) })
-    })
-    |> result.flatten()
+  let login_result = {
+    use body <- result.try(decode_request(json))
+
+    authenticator.login(
+      ctx.conn,
+      authenticator.UsernamePasswordAuthenticator(body.username, body.password),
+    )
+    |> result.map_error(AuthError)
+  }
 
   case login_result {
     Ok(tokens) ->
@@ -56,10 +52,12 @@ pub fn handler(req: wisp.Request, ctx: app.Context) -> wisp.Response {
       |> authenticator.to_json
       |> json.to_string_tree
       |> wisp.json_response(200)
-    Error(err) ->
-      [#("message", json.string(err.message))]
+    Error(err) -> {
+      io.debug(err)
+      [#("message", json.string("malformed request"))]
       |> json.object
       |> json.to_string_tree
       |> wisp.json_response(401)
+    }
   }
 }
