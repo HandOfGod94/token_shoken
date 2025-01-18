@@ -7,8 +7,8 @@ CREATE TABLE users (
 	password TEXT,
 	is_active BOOLEAN DEFAULT FALSE,
 	is_verified BOOLEAN DEFAULT FALSE,
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_at timestamp
+	created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+	updated_at INTEGER
 );
 -- Dbmate schema migrations
 INSERT INTO "schema_migrations" (version) VALUES

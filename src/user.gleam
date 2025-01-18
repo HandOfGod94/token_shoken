@@ -1,19 +1,40 @@
 import app
+import birl
 import cake/adapter/sqlite
 import cake/select as s
 import cake/where as w
+import db_utils
 import gleam/dynamic
 import gleam/dynamic/decode
+import gleam/io
 import gleam/list
 import gleam/result
 
 pub type User {
-  User(username: String, password: String)
+  User(
+    id: Int,
+    email: String,
+    username: String,
+    name: String,
+    password: String,
+    is_active: Bool,
+    is_verified: Bool,
+    created_at: birl.Time,
+  )
 }
 
 fn fetch_user_by_username(username: String) {
   s.new()
-  |> s.selects([s.col("username"), s.col("password")])
+  |> s.selects([
+    s.col("id"),
+    s.col("email"),
+    s.col("username"),
+    s.col("name"),
+    s.col("password"),
+    s.col("is_active"),
+    s.col("is_verified"),
+    s.col("created_at"),
+  ])
   |> s.from_table("users")
   |> s.where(w.col("username") |> w.eq(w.string(username)))
   |> s.limit(1)
@@ -23,11 +44,19 @@ fn fetch_user_by_username(username: String) {
 fn to_user(row) {
   row
   |> dynamic.from
-  |> dynamic.decode2(
+  |> io.debug
+  |> dynamic.decode8(
     User,
-    dynamic.element(0, dynamic.string),
+    dynamic.element(0, dynamic.int),
     dynamic.element(1, dynamic.string),
+    dynamic.element(2, dynamic.string),
+    dynamic.element(3, dynamic.string),
+    dynamic.element(4, dynamic.string),
+    dynamic.element(5, db_utils.dynamic_sqlite_bool),
+    dynamic.element(6, db_utils.dynamic_sqlite_bool),
+    dynamic.element(7, db_utils.dynamic_sqlite_datettime),
   )
+  |> io.debug
 }
 
 pub fn get_user(username: String) -> Result(User, Nil) {
@@ -42,5 +71,6 @@ pub fn get_user(username: String) -> Result(User, Nil) {
     rows
     |> list.find_map(to_user),
   )
+
   Ok(user)
 }
