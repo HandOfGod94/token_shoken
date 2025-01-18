@@ -7,6 +7,7 @@ import db_utils
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/io
+import gleam/json
 import gleam/list
 import gleam/result
 
@@ -59,6 +60,19 @@ fn to_user(row) {
   |> io.debug
 }
 
+pub fn to_json(user: User) -> json.Json {
+  [
+    #("id", json.int(user.id)),
+    #("email", json.string(user.email)),
+    #("username", json.string(user.username)),
+    #("name", json.string(user.name)),
+    #("is_active", json.bool(user.is_active)),
+    #("is_verified", json.bool(user.is_verified)),
+    #("created_at", json.string(user.created_at |> birl.to_http)),
+  ]
+  |> json.object
+}
+
 pub fn get_user(username: String) -> Result(User, Nil) {
   use db <- app.with_db_conn
   let db_res =
@@ -72,5 +86,6 @@ pub fn get_user(username: String) -> Result(User, Nil) {
     |> list.find_map(to_user),
   )
 
+  io.debug(to_json(user) |> json.to_string)
   Ok(user)
 }
