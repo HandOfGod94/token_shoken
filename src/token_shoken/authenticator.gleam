@@ -1,7 +1,7 @@
 import gleam/bool
 import gleam/json
 import gleam/result
-import user as user_repo
+import token_shoken/user as user_repo
 
 pub type Authenticator {
   UsernamePasswordAuthenticator(username: String, password: String)

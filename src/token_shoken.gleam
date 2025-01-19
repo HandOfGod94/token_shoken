@@ -1,10 +1,10 @@
-import app
 import dot_env as dot
 import dot_env/env
 import gleam/erlang/process
-import handlers/auth_with_password
-import handlers/health_check
 import mist
+import token_shoken/app
+import token_shoken/handlers/auth_with_password
+import token_shoken/handlers/health_check
 import wisp
 import wisp/wisp_mist
 

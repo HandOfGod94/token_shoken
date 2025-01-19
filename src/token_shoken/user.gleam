@@ -1,9 +1,8 @@
-import app
 import birl
 import cake/adapter/sqlite
 import cake/select as s
 import cake/where as w
-import db_utils
+import gleam/dict.{type Dict}
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/io
@@ -11,6 +10,8 @@ import gleam/json
 import gleam/list
 import gleam/option.{type Option}
 import gleam/result
+import token_shoken/app
+import token_shoken/db_utils
 
 pub type User {
   User(
@@ -43,6 +44,10 @@ fn fetch_user_by_username(username: String) {
   |> s.where(w.col("username") |> w.eq(w.string(username)))
   |> s.limit(1)
   |> s.to_query
+}
+
+fn create_user_query(params: Dict(string, a)) {
+  todo
 }
 
 fn to_user(row) {
@@ -99,4 +104,8 @@ pub fn get_user(username: String) -> Result(User, Nil) {
 
   io.debug(to_json(user) |> json.to_string)
   Ok(user)
+}
+
+pub fn create_user(params: Dict(string, a)) -> Option(String) {
+  todo
 }

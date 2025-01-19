@@ -1,11 +1,11 @@
-import app
-import authenticator
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/http
 import gleam/io
 import gleam/json
 import gleam/result
+import token_shoken/app
+import token_shoken/authenticator
 import wisp
 
 type AuthWithPassword {
