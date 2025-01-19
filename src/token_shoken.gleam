@@ -1,10 +1,12 @@
 import dot_env as dot
 import dot_env/env
 import gleam/erlang/process
+import gleam/http
 import mist
 import token_shoken/app
 import token_shoken/handlers/auth_with_password
 import token_shoken/handlers/health_check
+import token_shoken/handlers/register_user
 import wisp
 import wisp/wisp_mist
 
@@ -14,7 +16,14 @@ pub fn router(ctx: app.Context) {
 
     case wisp.path_segments(req) {
       ["api", "health"] -> health_check.handler(req)
-      ["api", "auth-with-password"] -> auth_with_password.handler(req, ctx)
+      ["api", "users"] -> {
+        use <- wisp.require_method(req, http.Post)
+        register_user.handler(req)
+      }
+      ["api", "auth-with-password"] -> {
+        use <- wisp.require_method(req, http.Post)
+        auth_with_password.handler(req, ctx)
+      }
       _ -> wisp.not_found()
     }
   }

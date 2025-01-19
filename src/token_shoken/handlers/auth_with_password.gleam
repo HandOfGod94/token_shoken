@@ -1,6 +1,5 @@
 import gleam/dynamic
 import gleam/dynamic/decode
-import gleam/http
 import gleam/io
 import gleam/json
 import gleam/result
@@ -33,7 +32,6 @@ fn decode_request(
 }
 
 pub fn handler(req: wisp.Request, _ctx: app.Context) -> wisp.Response {
-  use <- wisp.require_method(req, http.Post)
   use json <- wisp.require_json(req)
 
   let login_result = {

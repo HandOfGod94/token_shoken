@@ -14,6 +14,7 @@ pub type Tokens {
 pub type AuthError {
   UserNotPresentError(Nil)
   InvalidCredentialsError
+  UserNotActiveError
 }
 
 pub fn to_json(resp: Tokens) -> json.Json {
@@ -40,6 +41,7 @@ fn login_with_password(
     user_repo.get_user(username) |> result.map_error(UserNotPresentError),
   )
   use <- bool.guard(user.password != password, Error(InvalidCredentialsError))
+  use <- bool.guard(!user.is_active, Error(UserNotActiveError))
 
   Ok(Tokens("access_token", "refresh_token"))
 }
