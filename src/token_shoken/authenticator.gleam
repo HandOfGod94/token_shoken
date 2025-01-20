@@ -1,3 +1,5 @@
+import antigone
+import gleam/bit_array
 import gleam/bool
 import gleam/json
 import gleam/result
@@ -37,10 +39,17 @@ fn login_with_password(
   username: String,
   password: String,
 ) -> Result(Tokens, AuthError) {
+  let password_hash =
+    antigone.hasher()
+    |> antigone.hash(bit_array.from_string(password))
+
   use user <- result.try(
     user_repo.get_user(username) |> result.map_error(UserNotPresentError),
   )
-  use <- bool.guard(user.password != password, Error(InvalidCredentialsError))
+  use <- bool.guard(
+    antigone.verify(bit_array.from_string(user.password), password_hash),
+    Error(InvalidCredentialsError),
+  )
   use <- bool.guard(!user.is_active, Error(UserNotActiveError))
 
   Ok(Tokens("access_token", "refresh_token"))

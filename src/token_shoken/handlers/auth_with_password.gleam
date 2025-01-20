@@ -1,3 +1,4 @@
+import antigone
 import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/io
@@ -41,7 +42,10 @@ pub fn handler(req: wisp.Request, _ctx: app.Context) -> wisp.Response {
       body.username,
       body.password,
     ))
-    |> result.map_error(AuthError)
+    |> result.map_error(fn(err) {
+      antigone.fake_verify(antigone.hasher())
+      AuthError(err)
+    })
   }
 
   case login_result {

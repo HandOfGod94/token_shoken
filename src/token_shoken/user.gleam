@@ -1,5 +1,7 @@
+import antigone
 import birl
 import cake/adapter/sqlite
+import gleam/bit_array
 import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
@@ -17,7 +19,7 @@ pub type User {
     id: Int,
     email: String,
     username: String,
-    name: String,
+    name: Option(String),
     password: String,
     is_active: Bool,
     is_verified: Bool,
@@ -31,7 +33,7 @@ pub fn to_json(user: User) -> json.Json {
     #("id", json.int(user.id)),
     #("email", json.string(user.email)),
     #("username", json.string(user.username)),
-    #("name", json.string(user.name)),
+    #("name", json.string(user.name |> option.unwrap(""))),
     #("is_active", json.bool(user.is_active)),
     #("is_verified", json.bool(user.is_verified)),
     #("created_at", json.string(user.created_at |> birl.to_http)),
@@ -52,7 +54,10 @@ pub fn get_user(username: String) -> Result(User, Nil) {
     username
     |> repo.fetch_user_by_username()
     |> sqlite.run_read_query(decode.dynamic, db)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.map_error(fn(err) {
+      io.debug(err)
+      Nil
+    }),
   )
   use user <- result.try(
     rows
@@ -67,9 +72,13 @@ pub fn create_user(
   password password: String,
   email email: String,
 ) -> Result(Int, Nil) {
+  let password_hash =
+    antigone.hasher()
+    |> antigone.hash(bit_array.from_string(password))
+
   use db <- app.with_db_conn
   use dbres <- result.try(
-    repo.create_user(username, password, email)
+    repo.create_user(username, password_hash, email, True)
     |> sqlite.run_write_query(decode.list(of: decode.int), db)
     |> result.map_error(fn(err) {
       io.debug(err)
@@ -94,7 +103,7 @@ fn to_user(row) -> Result(User, List(dynamic.DecodeError)) {
     dynamic.element(0, dynamic.int),
     dynamic.element(1, dynamic.string),
     dynamic.element(2, dynamic.string),
-    dynamic.element(3, dynamic.string),
+    dynamic.element(3, dynamic.optional(dynamic.string)),
     dynamic.element(4, dynamic.string),
     dynamic.element(5, db_utils.dynamic_sqlite_bool),
     dynamic.element(6, db_utils.dynamic_sqlite_bool),

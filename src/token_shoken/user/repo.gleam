@@ -26,10 +26,14 @@ pub fn create_user(
   username: String,
   password: String,
   email: String,
+  is_active: Bool,
 ) -> cake.WriteQuery(List(Int)) {
-  [[i.string(username), i.string(password), i.string(email)] |> i.row]
+  [
+    [i.string(username), i.string(password), i.string(email), i.bool(is_active)]
+    |> i.row,
+  ]
   |> i.from_values(table_name: "users", columns: [
-    "username", "password", "email",
+    "username", "password", "email", "is_active",
   ])
   |> i.returning(["id"])
   |> i.to_query
