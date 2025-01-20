@@ -1,7 +1,9 @@
 import birl
 import cake/adapter/sqlite
+import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
+import gleam/io
 import gleam/json
 import gleam/list
 import gleam/option.{type Option}
@@ -46,12 +48,12 @@ pub fn to_json(user: User) -> json.Json {
 
 pub fn get_user(username: String) -> Result(User, Nil) {
   use db <- app.with_db_conn
-  let db_res =
+  use rows <- result.try(
     username
     |> repo.fetch_user_by_username()
     |> sqlite.run_read_query(decode.dynamic, db)
-
-  use rows <- result.try(db_res |> result.map_error(fn(_) { Nil }))
+    |> result.map_error(fn(_) { Nil }),
+  )
   use user <- result.try(
     rows
     |> list.find_map(to_user),
@@ -64,8 +66,24 @@ pub fn create_user(
   username username: String,
   password password: String,
   email email: String,
-) -> String {
-  todo
+) -> Result(Int, Nil) {
+  use db <- app.with_db_conn
+  use dbres <- result.try(
+    repo.create_user(username, password, email)
+    |> sqlite.run_write_query(decode.list(of: decode.int), db)
+    |> result.map_error(fn(err) {
+      io.debug(err)
+      Nil
+    }),
+  )
+  use id <- result.try(
+    dbres
+    |> list.flatten
+    |> list.first,
+  )
+  use <- bool.guard(id == 0, Error(Nil))
+
+  Ok(id)
 }
 
 fn to_user(row) -> Result(User, List(dynamic.DecodeError)) {

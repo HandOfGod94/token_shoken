@@ -1,6 +1,7 @@
 import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
+import gleam/io
 import gleam/json
 import gleam/result
 import token_shoken/user
@@ -18,6 +19,7 @@ type RegisterUserRequest {
 type RegisterUserRequestError {
   BadRequestError(List(decode.DecodeError))
   PasswordConfirmMatchError
+  UnableToCreateUserError(Nil)
 }
 
 fn decode_request(
@@ -53,15 +55,19 @@ pub fn handler(req: Request) -> Response {
       Error(PasswordConfirmMatchError),
     )
     let RegisterUserRequest(username, password, _, email) = params
-    Ok(user.create_user(username:, password:, email:))
+    user.create_user(username:, password:, email:)
+    |> result.map_error(UnableToCreateUserError)
   }
 
   case handle {
     Ok(id) ->
-      [#("id", json.string(id))]
+      [#("id", json.int(id))]
       |> json.object
       |> json.to_string_tree
       |> wisp.json_response(201)
-    Error(_) -> wisp.bad_request()
+    Error(err) -> {
+      io.debug(err)
+      wisp.bad_request()
+    }
   }
 }

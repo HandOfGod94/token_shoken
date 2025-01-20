@@ -1,7 +1,9 @@
+import cake
+import cake/insert as i
 import cake/select as s
 import cake/where as w
 
-pub fn fetch_user_by_username(username: String) {
+pub fn fetch_user_by_username(username: String) -> cake.ReadQuery {
   s.new()
   |> s.selects([
     s.col("id"),
@@ -18,4 +20,17 @@ pub fn fetch_user_by_username(username: String) {
   |> s.where(w.col("username") |> w.eq(w.string(username)))
   |> s.limit(1)
   |> s.to_query
+}
+
+pub fn create_user(
+  username: String,
+  password: String,
+  email: String,
+) -> cake.WriteQuery(List(Int)) {
+  [[i.string(username), i.string(password), i.string(email)] |> i.row]
+  |> i.from_values(table_name: "users", columns: [
+    "username", "password", "email",
+  ])
+  |> i.returning(["id"])
+  |> i.to_query
 }
